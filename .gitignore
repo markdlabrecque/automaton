@@ -1,0 +1,4 @@
+# Optional in-checkout agent configuration, state, artifacts, and scratch data.
+# Deployed agents and important backups belong outside the repository.
+# Ignore rules are not access control and do not protect already tracked files.
+/.local/

@@ -2,36 +2,43 @@
 
 ## Status
 
-Draft 0.1 for discussion. This document defines the product and its required behavior. It is not an approved implementation plan. Proposed defaults and open questions remain subject to review.
+Draft 0.2 for discussion. This document defines the product and its required behavior. It is not an approved implementation plan. Accepted personal-use, composition, repository, and deployment decisions are recorded below. Other proposed defaults and open questions remain subject to the [design review](docs/design-review.md).
 
 ## Product vision
 
-Automaton is a self-hosted platform for durable, long-running agents. An operator can deploy several agents on one Linux host. Each agent has a defined purpose, its own durable state, and a configured set of capabilities.
+Automaton is a self-hosted personal platform for durable, long-running agents. It is built for its owner's use. It can be open source, but ease of personal use takes priority over a third-party ecosystem or general distribution requirements.
 
-The core uses Pi and pi-durable and runs under systemd. It supplies basic tools and the machinery to accept work, preserve progress, recover after interruption, and host modules. Modules supply all domain-specific functions and external integrations.
+The owner can deploy several purpose-specific agents on one Linux host. Each agent has a persistent identity, its own durable state, and a configured set of capabilities. The owner installs Automaton once per host and deploys agents independently through configuration and separate services, not separate application builds.
 
-The platform must support new capabilities without changes to the core. An operator can adapt an existing module or install a new one to give an agent a different purpose.
+The core uses Pi and pi-durable and runs under systemd. It supplies the basic tools and the machinery to accept work, preserve progress, recover after interruption, and host modules. An agent has the basic tools and no enabled modules by default. Modules supply opt-in capabilities, including model access and domain functions.
+
+The module contract exists to compose agents for different purposes without changes to the core. The Core, basic tools, CLI, optional modules, and deployment assets live in one monorepo. Sharing a repository or installation does not enable a module for every agent.
 
 ## Confirmed decisions
 
+- Prioritize the owner's personal use. Open-source availability does not create a requirement to support a third-party ecosystem.
+- Use one monorepo for the Core, basic tools, CLI, optional modules, deployment assets, and documentation.
+- Keep real agent configuration and state outside the deployed code. Local development can use the ignored root `.local/` directory.
+- Install Automaton once per host. Configure each agent independently and keep its state separate from both code and configuration.
 - Use Pi and pi-durable as the agent foundation.
-- Run agents as systemd services.
+- Run each agent as its own systemd service under a separate unprivileged account. No central manager service is required.
+- Target one installed code version per host initially; independent agent configuration does not promise independent runtime versions.
 - Support several purpose-specific agents on a single host.
 - Keep reminders, providers, to-do lists, and other application functions in modules.
 - Prove the core independently, then deliver one useful module before the first release is complete.
-- Include Pi file and shell tools as the baseline. Enforce their access through the agent's OS account and service restrictions.
+- Include Pi file and shell tools as the built-in baseline, not an enabled Automaton module. Enable no modules by default. Enforce tool access through the agent's OS account and service restrictions.
+- Treat agent identity as independent of process lifetime, conversational context, and mutable names. Restore and host moves preserve identity; an intentional clone creates a new identity.
+- In Slice 1, accept operator-initiated work with durable follow-through, not unsolicited schedules or invented goals. Expose one primary operator conversation; domain state outlives its context.
 - Start with trusted, operator-installed modules that run in-process and use a versioned contract.
 - Do not require hot reload in the first release.
 
 ## Intended users
 
-**Operator:** installs the platform, configures agents, grants access, selects modules, and maintains services and backups.
+The owner is the intended user and operator: they install the platform, configure agents, grant access, select modules, submit work, and maintain services and backups.
 
-**Agent user:** gives an agent work and inspects its progress and results through an enabled interface. The operator and agent user can be the same person.
+The owner or their coding agents can develop modules to add capabilities. Module development is a personal workflow, not a separate product audience or a promise of public API compatibility for unknown third parties.
 
-**Module author:** adds a capability without a private fork of the core or direct changes to core storage.
-
-The initial deployment serves one trusted operator. A multi-tenant service for unrelated users is not a first-release goal.
+There is no multi-tenant or third-party ecosystem roadmap implied by open sourcing the code. Explicit module boundaries still matter because they keep purpose-specific capabilities optional and make the owner's changes easier.
 
 ## User outcomes
 
@@ -44,6 +51,10 @@ The initial deployment serves one trusted operator. A multi-tenant service for u
 7. The first release completes a real use case through a module, not only a synthetic demonstration.
 
 ## Product principles
+
+### Personal convenience guides complexity
+
+Prefer a simple monorepo and shared host installation over independent packages, release systems, or services without a demonstrated personal need. Module code must still respect the public module contract; proximity in the repository is not permission to bypass it.
 
 ### Durable does not mean always reasoning
 
@@ -89,9 +100,9 @@ A minimal local control surface belongs to the platform so an operator can submi
 
 Each agent must have:
 
-- A stable instance identifier and purpose instructions.
-- An explicit module list and module configuration.
-- A selected model supplied by a provider module.
+- A persistent agent identity, separate from its mutable name or service address, and purpose instructions.
+- An explicit module list and module configuration; the list is empty by default.
+- A model selected through an enabled model-provider module when model-dependent work is configured.
 - A workspace and persistent data location.
 - Credential references or protected credential inputs, separate from source control.
 - Execution limits, including bounded retries and concurrency.
@@ -99,7 +110,9 @@ Each agent must have:
 
 Startup must validate configuration, module compatibility, dependencies, and required credentials before accepting affected work. Diagnostics must name the problem without printing secrets.
 
-The agent must not silently select every module installed on the host. Installing a module and enabling it for an agent are separate actions.
+The agent must not silently select every module installed on the host. Making module code available and enabling it for an agent are separate actions. Basic tools do not count as an enabled Automaton module.
+
+A default agent therefore has no configured model provider. Bare-agent startup, readiness, and available controls remain open design questions; implementation must not silently enable a provider.
 
 ### 2. Accept and track durable work
 
@@ -148,7 +161,7 @@ The platform must reject incompatible API versions, missing dependencies, and co
 
 Module data must have stable names and ownership. A module must not depend on private core tables. Use native pi-durable extensions where appropriate, with an Automaton contract for configuration and lifecycle.
 
-A module author must be able to adapt an existing package through a small adapter. The platform must not claim that arbitrary Pi extensions, skills, or MCP servers work unchanged; compatibility requires a documented adapter or supported contract.
+The owner must be able to adapt an existing package without changing the core. The platform must not claim that arbitrary Pi extensions, skills, or MCP servers work unchanged; compatibility requires an adapter or supported contract. The contract serves the owner's composition and maintenance needs, not speculative third-party publishing requirements.
 
 Installed modules run with the service's authority. Module declarations aid review and validation; they do not sandbox module code. A module can crash the agent process. The operator must trust installed code.
 
@@ -164,11 +177,15 @@ Module and core upgrades must state whether existing checkpoints and data remain
 
 ### 6. Run several agents on one host
 
-Each agent must run in a separate service process with independent configuration, durable storage, workspace selection, and credential inputs. Restarting or stopping one agent must not stop another.
+Each agent must run in a separate service process with independent configuration, durable storage, workspace selection, and credential inputs. Services share one installed codebase, not live harnesses or agent state. Restarting or stopping one agent must not stop another.
 
-Proposed deployment form: an `automaton@<instance>.service` template, or an equivalent systemd arrangement with the same independence.
+Use systemd to manage the individual agent services without a required central manager daemon. An illustrative service name is `automaton@<service-name>.service`; the service name is not the agent's immutable identity. Exact addressing and rename rules remain to be specified.
 
-The platform must prevent two processes from owning the same writable agent store. Instance names, storage paths, sockets, and ports must not collide silently.
+The platform must prevent two processes from owning the same writable agent store. Service addresses, storage paths, and sockets must not collide silently. Cross-host duplicate detection and distributed ownership are deferred; the owner must stop the old service before a host move or recovered copy becomes active.
+
+An agent configuration change applies independently to that agent after validation and restart. A shared code upgrade affects the host installation and requires compatible state and controlled restarts of affected services. Slice 1 does not promise independent runtime versions per agent.
+
+See [Deployment and repository model](docs/deployment-model.md) for the accepted boundaries and illustrative layouts.
 
 Independent configuration is not a security boundary. Where agents must not access each other's files or credentials, deployment must enforce that restriction through separate OS identities and appropriate filesystem and systemd controls. Separate directories under one unrestricted account are insufficient.
 
@@ -193,7 +210,9 @@ Readiness must mean that configured work can actually be accepted, not merely th
 
 ### 8. Preserve and restore state
 
-Persistent state must live outside the application checkout and survive deployment replacement. The storage implementation must support consistent backup and documented restore.
+Deployed agent configuration and persistent state must live outside the application checkout and installed code, and survive deployment replacement. Local development can use an ignored root `.local/` directory for configuration, state, and artifacts. Tracked files can contain sanitized templates, not real agent deployments or credentials. Git ignore rules do not provide security or protect files already tracked.
+
+The storage implementation must support consistent backup and documented restore. Important backups live outside the checkout, including outside `.local/`.
 
 A backup must identify the core version, module versions, and configuration needed to interpret its state. Credential backup and restoration need a separate, explicit policy.
 
@@ -242,7 +261,9 @@ A minimal agent accepts durable work, uses the basic tools within its service pe
 
 One selected domain module completes a real operator use case through a configured provider and interface. Its behavior remains in the module. The core must not acquire domain-specific branches to make the demonstration work.
 
-The useful module and interface have not been selected. Reminders and to-do lists are possible candidates, not commitments.
+Slice 1 uses an optional workspace-report module as its useful domain proof, through local CLI control and an OpenAI-compatible model-provider module. The report uses a module-owned workflow to collect bounded allowed material, get a tool-free model summary, and save the result. Exact report content and endpoint policy remain under review.
+
+The report module lives in the monorepo but is not part of the Core or enabled by default.
 
 A provider module is required support for model use. It does not replace the requirement to prove a useful domain capability.
 
@@ -284,13 +305,14 @@ Use unit checks for policy and validation, integration checks for real boundarie
 
 ## Decisions for the next revision
 
-1. **First useful agent:** What concrete job must it do, and what result makes it useful?
-2. **First interface:** Is local CLI access sufficient initially, or does the useful agent need a chat, web, or messaging module?
-3. **Provider scope:** Does “providers” mean model providers only, or also other provider categories? Which model provider comes first?
-4. **Deployment profile:** System services with separate service accounts, user services, or both? What isolation must the supported profile enforce?
-5. **Module distribution:** Local packages, npm packages, or both? What installation and version-pinning flow does the operator need?
-6. **Control model:** What can an agent user stop, approve, or retry, and what remains operator-only?
-7. **Continuity:** How many conversations does an agent serve, and which context or state is shared between them?
-8. **Operational targets:** What host size, agent count, resource budget, retention, and recovery targets matter for the first release?
+1. **Report contract:** What source material, contents, and saved-result behavior make the workspace report useful?
+2. **Bare agent:** With basic tools but no model-provider module, what startup, readiness, and control behavior is available?
+3. **Endpoint policy:** The first model module uses an OpenAI-compatible endpoint; loopback/private-only restrictions and privacy guarantees are not yet settled.
+4. **Deployment details:** What exact identifiers, paths, credential inputs, service restrictions, and upgrade activation procedure support the accepted shared-installation model?
+5. **Module tooling:** What is the simplest monorepo build/loading and version-compatibility flow? Independent module distribution is not required by the current scope.
+6. **Control model:** Define queueing, cancellation, retry, interrupted outcomes, and any approval boundary for the owner.
+7. **Operational targets:** What host size, agent count, resource budget, retention, and recovery targets matter for the first release?
 
-Choose the first useful job and interface next. Those choices will expose the minimum module contract needed for a working release. Detailed APIs, file layouts, and implementation tickets come after that review.
+One primary operator conversation is settled for Slice 1; additional independent conversations and multi-user access are deferred. Scheduled/external triggers, autonomous goal initiation, cross-host coordination, side-by-side runtime versions, and hot reload are deferred until a concrete need justifies them.
+
+Continue the [design review](docs/design-review.md), then reconcile the paused implementation tickets before restoring readiness. Accepted deployment decisions do not approve the remaining ticket assumptions.
