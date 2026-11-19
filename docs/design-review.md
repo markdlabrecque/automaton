@@ -1,6 +1,6 @@
 # Slice 1 design review
 
-Status: awaiting confirmation of the Slice 1 design. This is a decision register, not an approved implementation plan. [GLOSSARY.md](../GLOSSARY.md) contains settled terminology. [PRD.md](../PRD.md) and the existing tickets still reflect earlier assumptions and need reconciliation after the operator confirms shared understanding. See [Deployment and repository model](deployment-model.md) for the earlier accepted deployment direction.
+Status: **Slice 1 scope approved by the owner**, including all three model routes and preservation of selective restore as a hard positive evidence gate. Independent compatibility work may proceed; recovery-dependent implementation remains blocked pending supported interfaces and affirmative proof. [PRD.md](../PRD.md) contains the reconciled requirements, [development-backlog.md](development-backlog.md) defines execution order and evidence ownership, and [GLOSSARY.md](../GLOSSARY.md) contains settled terminology. This approval does not authorize production access, credential retrieval, subscription sign-in or host-service changes.
 
 ## Settled decisions
 
@@ -8,7 +8,7 @@ Status: awaiting confirmation of the Slice 1 design. This is a decision register
 | --- | --- | --- |
 | Q1: Agent identity | An agent is a persistent individual, not a process, model, or conversation. Its service is a separate concept. | A restart or host move preserves identity. Slice 1 permits one active service for an agent. Review uses of agent, instance, service, and daemon in documentation and tickets. |
 | Q2: Work initiation | Slice 1 accepts explicit operator requests and follows that work through completion, durable waits, or a visible stop condition. | Durability does not authorize new goals or unsolicited periodic activity. |
-| Q3: Review gate | Remove ready-for-agent from the epic during review. | The label is removed. This neither stops nor cancels any work already in progress. Restore readiness only after approval of the revised documents and tickets. |
+| Q3: Review gate | Scope is now approved; readiness applies only to runnable task tickets after reconciliation. | Keep the epic and blocked tasks off ready-for-agent. Initial entry points are the independent foundation and three provider-feasibility investigations; closing negative evidence never passes a positive gate. |
 | Q4: Identity lifecycle | Restore and host move preserve agent identity. A deliberate clone is a new agent. A mutable operator-facing name is separate from identity. | Cross-host duplicate execution is not prevented by a local ownership guard. A clone command is not automatically required by this identity rule. |
 | Q5: Conversations | The agent owns its purpose and domain state independently of conversational context. Slice 1 exposes one primary operator conversation. | A fresh conversation does not erase reports, pending work, or agent identity. Additional independent operator conversations and multi-user access are deferred. |
 | Q6: Module language | Module is the capability package; Model provider is a capability role; Pi extension is an upstream runtime integration, not a synonym for Module. | One module can contribute several capabilities. An instruction/skill document alone is not a module. |
@@ -95,20 +95,15 @@ The earlier Q8–Q11 batch was canceled after Q8 and Q9. Q10 and Q11 were resolv
   - Selective restored-work activation and stopped-service shared upgrade — settled (Q19, Q23).
   - Portable backup contents and measured two-agent host acceptance — settled (Q27, Q28).
   - Dedicated report service may receive explicit private-network grants — settled (Q31). Exact permissions and paths are delegated within the agreed boundaries.
-- Scope closure — awaiting operator confirmation before reconciling the PRD and ticket specifications. Evidence gates are not approvals to weaken the design.
+- Scope closure — operator approved the scope and recommended gated development. PRD and ticket specifications are reconciled in the development backlog. Evidence gates are not approvals to weaken the design.
 
 ## Tracker state
 
-Epic: [SLICE 1: Durable agents, workspace reports, and isolated services](https://github.com/markdlabrecque/automaton/issues/1).
+Epic: [Run durable personal agents and save workspace reports](https://github.com/markdlabrecque/automaton/issues/1). See [the development backlog](development-backlog.md) for the full dependency graph, estimates, evidence status and operator acceptance.
 
-The epic has ten child issues and none are marked ready for agents. The current estimate and dependency graph predate the broker and subscription scope. Reconcile the existing tickets before restoring readiness:
+- Runnable: [#2](https://github.com/markdlabrecque/automaton/issues/2) (pinned foundation/admission), and provider feasibility [#21](https://github.com/markdlabrecque/automaton/issues/21), [#22](https://github.com/markdlabrecque/automaton/issues/22), [#23](https://github.com/markdlabrecque/automaton/issues/23).
+- After #2: independent affirmative queue/safety [#24](https://github.com/markdlabrecque/automaton/issues/24), store ownership [#25](https://github.com/markdlabrecque/automaton/issues/25), and broker-seam [#26](https://github.com/markdlabrecque/automaton/issues/26) proofs. Their results gate the corresponding implementation, not unrelated work.
+- [#15](https://github.com/markdlabrecque/automaton/issues/15) delivered negative evidence merged via [PR #19](https://github.com/markdlabrecque/automaton/pull/19). The outstanding affirmative selective-release outcome belongs to [#20](https://github.com/markdlabrecque/automaton/issues/20), waiting for a concrete supported mechanism. Neither closing #15 nor green repository CI passes it.
+- Agent runtime [#6](https://github.com/markdlabrecque/automaton/issues/6) and restore [#9](https://github.com/markdlabrecque/automaton/issues/9) explicitly depend on #20. Model adapters require supported feasibility outcomes plus affirmative synthetic verification. Real provider/host acceptance remains [#11](https://github.com/markdlabrecque/automaton/issues/11).
 
-| Tickets | Reconciliation needed |
-| --- | --- |
-| [#2](https://github.com/markdlabrecque/automaton/issues/2), [#4](https://github.com/markdlabrecque/automaton/issues/4) | Replace the `FULL` gate with process-crash evidence; keep exclusive ownership, committed receipts and honest storage limits. Expand the pinned-upstream evidence for broker transport and recovery semantics. |
-| [#3](https://github.com/markdlabrecque/automaton/issues/3), [#5](https://github.com/markdlabrecque/automaton/issues/5) | Replace arbitrary local module loading and per-agent credentials with explicit shared-install module selection and a broker-side provider contract. Break out broker and provider-specific work where edit boundaries permit; give unsupported integrations a blocking investigation. |
-| [#6](https://github.com/markdlabrecque/automaton/issues/6), [#7](https://github.com/markdlabrecque/automaton/issues/7) | Specify providerless controls, queueing, cancellation, route-change preflight, and the distinction between broker IPC and the protected operator socket. |
-| [#8](https://github.com/markdlabrecque/automaton/issues/8), [#9](https://github.com/markdlabrecque/automaton/issues/9) | Specify opt-in hosted reports, canonical results versus export, sensitive backup boundaries, and selective activation of restored work. |
-| [#10](https://github.com/markdlabrecque/automaton/issues/10), [#11](https://github.com/markdlabrecque/automaton/issues/11) | Package the separate broker and agent identities. Require real private report, hosted subscription, service isolation, restore, and reboot evidence without exposing private data. |
-
-This decision record does not authorize implementation, deployment, ticket rewrites, or restoration of readiness.
+The owner approved backlog/doc reconciliation and marking only actionable tasks ready. No runtime, provider, host or release acceptance is implied.

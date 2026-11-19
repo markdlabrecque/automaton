@@ -1,6 +1,6 @@
 # Selective recovery on pi-durable 1.5.2
 
-**Result: the tested public Harness paths do not satisfy [Slice 1 Q19](../../docs/design-review.md).** A new model input can complete, but admitting it also lets an unselected restored generation settle. Withholding a custom task definition keeps tasks of that kind blocked, but reinstalling it releases both same-kind tasks. Treat selective recovery of existing Pi work as **blocked for [#2](https://github.com/markdlabrecque/automaton/issues/2)** until a supported per-item control is demonstrated. This is evidence against the tested mappings, not a proof that every possible composition is impossible.
+**Result: the tested public Harness paths do not satisfy [Slice 1 Q19](../../docs/design-review.md).** A new model input can complete, but admitting it also lets an unselected restored generation settle. Withholding a custom task definition keeps tasks of that kind blocked, but reinstalling it releases both same-kind tasks. Treat selective recovery of existing Pi work as **blocked on the affirmative proof [#20](https://github.com/markdlabrecque/automaton/issues/20)** until a supported per-item control is demonstrated. The evidence-only investigation [#15](https://github.com/markdlabrecque/automaton/issues/15) is complete; its closure does not pass this gate. Independent [#2](https://github.com/markdlabrecque/automaton/issues/2) foundation/admission work may proceed. This is evidence against the tested mappings, not a proof that every possible composition is impossible.
 
 ## Reproduce
 
@@ -46,11 +46,11 @@ References below are relative to the published `node_modules/@earendil-works/pi-
 
 ## Downstream contract
 
-Do not use paused writable reopen, transactional submission, targeted waits, or registry withholding as the Q19 implementation. Read-only inspection can remain an independent operation, subject to the storage and ownership checks in [#2](https://github.com/markdlabrecque/automaton/issues/2). This probe does not cover those checks, same-conversation ordering, or non-replay of uncertain tool effects.
+Do not use paused writable reopen, transactional submission, targeted waits, or registry withholding as the Q19 implementation. Read-only inspection can remain an independent operation, subject to the independent storage and ownership proof [#25](https://github.com/markdlabrecque/automaton/issues/25). This probe does not cover those checks, same-conversation ordering, or non-replay of uncertain tool effects.
 
 The [upstream request for a supported per-item hold](https://github.com/earendil-works/pi/issues/12306) was auto-closed by the new-contributor policy without a maintainer reply (checked during evidence integration). This is not a technical answer or a resolved gate. Wait for a concrete supported mechanism or an explicit product decision; do not repeat this investigation or build a replacement scheduler. The 1.5.2 pin and Q19 guarantees remain unchanged.
 
-Require an affirmative integration probe against a supported candidate before shipping restore release:
+The owner approved preserving Q19 during backlog preparation. Evaluate a later pin only if it documents a concrete supported candidate, under [#20](https://github.com/markdlabrecque/automaton/issues/20). Require an affirmative integration probe before recovery-dependent runtime or restore implementation proceeds:
 
 1. Restore two distinguishable eligible items, A and C, of the same kind. Inspect them without starting or settling either. Cover built-in generation, not only cooperative custom task definitions.
 2. Admit and complete B in an independent conversation in the same Harness. A and C must retain their identities and stay parked, with neither executing nor settling.
