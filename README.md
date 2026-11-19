@@ -22,4 +22,10 @@ Use ticket branches and epic integration branches, with PRs into `develop` and r
   - [Personal composition and the basic-tools baseline](docs/adr/0003-personal-composition-and-basic-tools-baseline.md)
   - [Monorepo and shared installation](docs/adr/0004-monorepo-and-shared-installation.md)
 
-The project is in design review. These documents record accepted directions and open questions; they do not claim an implemented runtime or installation procedure. The [Slice 1 epic](https://github.com/markdlabrecque/automaton/issues/1) remains paused for reconciliation with the design decisions.
+## Current status
+
+- **Repository workflow is established:** [PR #16](https://github.com/markdlabrecque/automaton/pull/16) landed on `develop`. It is the default development branch; `main` remains the release branch. Protected integration/release branches require PRs and passing checks, with no administrator bypass. See [CONTRIBUTING.md](CONTRIBUTING.md) for task and epic routes.
+- **CI is a foundation, not runtime acceptance:** the workflow runs on branch pushes and PRs, validates PR routes/ticket references, and runs the policy unit tests. It also runs the synthetic selective-recovery probes when their investigation files are present. Those files have not yet landed on `develop`; no application build/typecheck suite or installed runtime is delivered by the workflow change.
+- **Slice 1 is still gated:** the [epic](https://github.com/markdlabrecque/automaton/issues/1) remains open. [Selective recovery](https://github.com/markdlabrecque/automaton/issues/15) has reproducible negative evidence against pi-durable 1.5.2, not a passing restore implementation. Its evidence branch is not yet merged. Independent checks in the [compatibility task](https://github.com/markdlabrecque/automaton/issues/2) can proceed, while the selective-release path remains blocked pending a supported mechanism and positive evidence.
+
+The product and deployment documents describe intended behavior, not an implemented runtime or installation procedure. Merging repository infrastructure does not approve unresolved design questions or satisfy provider, recovery, or non-production host release gates.
