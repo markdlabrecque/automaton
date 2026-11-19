@@ -2,3 +2,5 @@
 # Deployed agents and important backups belong outside the repository.
 # Ignore rules are not access control and do not protect already tracked files.
 /.local/
+/node_modules/
+/dist/
