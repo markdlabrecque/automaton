@@ -6,6 +6,10 @@ Install Automaton once per host. Configure each agent independently, with its ow
 
 The Core, basic tools, CLI, optional modules, and deployment assets share one monorepo. Real agent configuration and state live outside the deployed code. Local development can use the ignored root `.local/` directory; tracked examples must contain no private data or credentials.
 
+## Contributing
+
+Use ticket branches and epic integration branches, with PRs into `develop` and release PRs from `develop` into `main`. See [the development workflow](CONTRIBUTING.md) for branch names, required ticket links, CI, and protected-branch rules.
+
 ## Documentation
 
 - [Product requirements](PRD.md)
