@@ -48,7 +48,9 @@ References below are relative to the published `node_modules/@earendil-works/pi-
 
 Do not use paused writable reopen, transactional submission, targeted waits, or registry withholding as the Q19 implementation. Read-only inspection can remain an independent operation, subject to the storage and ownership checks in [#2](https://github.com/markdlabrecque/automaton/issues/2). This probe does not cover those checks, same-conversation ordering, or non-replay of uncertain tool effects.
 
-Ask upstream for a supported seam, or evaluate a later pin that documents one. Require an affirmative integration probe against the candidate before shipping restore release:
+The [upstream request for a supported per-item hold](https://github.com/earendil-works/pi/issues/12306) was auto-closed by the new-contributor policy without a maintainer reply (checked during evidence integration). This is not a technical answer or a resolved gate. Wait for a concrete supported mechanism or an explicit product decision; do not repeat this investigation or build a replacement scheduler. The 1.5.2 pin and Q19 guarantees remain unchanged.
+
+Require an affirmative integration probe against a supported candidate before shipping restore release:
 
 1. Restore two distinguishable eligible items, A and C, of the same kind. Inspect them without starting or settling either. Cover built-in generation, not only cooperative custom task definitions.
 2. Admit and complete B in an independent conversation in the same Harness. A and C must retain their identities and stay parked, with neither executing nor settling.
