@@ -53,6 +53,8 @@ The required PR job always runs, including branch-route and ticket validation. O
 
 Changes to workflows, rulesets, scripts, tests, dependencies, other file types, or any mixture of docs and code run the full checks. Renames count both the old and new paths. PR detection covers the complete merge-base diff, not just the latest commit; push detection covers the complete pushed range. Manual runs, new branches, empty diffs, unavailable history, or detection errors default to full checks. There are no workflow-level path filters that could leave a required check pending.
 
+To force full checks for a documentation branch, use Actions → CI → Run workflow and select that branch. Manual runs never take the docs-only shortcut.
+
 Run the commit-tier checks locally before opening a PR, with Node 24.20.0:
 
 ```sh
