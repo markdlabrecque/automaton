@@ -58,12 +58,15 @@ To force full checks for a documentation branch, use Actions → CI → Run work
 Run the commit-tier checks locally before opening a PR, with Node 24.20.0:
 
 ```sh
-node --test tests/*.test.mjs
+npm ci --ignore-scripts --no-audit --no-fund
+npm run typecheck
+npm run build
+npm test
 # If the selective-recovery investigation is present on your branch:
 (cd investigations/selective-recovery && npm ci --ignore-scripts --no-audit --no-fund && npm run probe)
 ```
 
-The policy and docs-path classification tests are unit-tier; one local Git integration test verifies actual diff behavior. The investigation probes use real local persistence and synthetic providers (integration-tier). Their success reproduces known compatibility findings; it does **not** pass the selective-recovery release gate. There is no implemented application build/typecheck suite on the initial development branch. Add those checks as the runtime lands; do not mistake the current CI for runtime or release acceptance.
+The policy and docs-path classification tests are unit-tier; one local Git integration test verifies actual diff behavior. The investigation probes use real local persistence and synthetic providers (integration-tier). Their success reproduces known compatibility findings; it does **not** pass the selective-recovery release gate. The foundation build and integration checks are narrow compatibility evidence, not a complete application runtime or release acceptance; see [upstream compatibility](docs/upstream-compatibility.md).
 
 Keep unit/integration checks on every code-affecting commit; the docs-only CI exception above skips those checks for strictly allowlisted documentation changes. Future functional journeys belong in PR/nightly CI, with real-model/systemd acceptance remaining operator-run on a non-production host.
 

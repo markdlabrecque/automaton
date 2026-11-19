@@ -34,9 +34,15 @@ jobs:
       - name: Detect docs-only changes
         id: changes
         run: node scripts/detect-docs-only.mjs
+      - name: Clean install, typecheck and build
+        if: steps.changes.outputs.docs_only != 'true'
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run typecheck
+          npm run build
       - name: Unit and integration tests
         if: steps.changes.outputs.docs_only != 'true'
-        run: node --test tests/*.test.mjs
+        run: npm test
       - name: Synthetic selective-recovery investigation (when present)
         if: steps.changes.outputs.docs_only != 'true'
         shell: bash
