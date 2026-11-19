@@ -47,6 +47,12 @@ The CI policy validates routes and matching URL numbers, not issue existence, su
 
 The `CI` workflow runs on every branch push and every PR (including PRs into `develop`, `epic/*`, and `main`). PR body/base edits rerun metadata checks. It has read-only permissions, does not retain checkout credentials, and uses no provider credentials or live services.
 
+### Docs-only CI exception
+
+The required PR job always runs, including branch-route and ticket validation. Only code tests and recovery probes are skipped when **every changed path** is one of root `README.md`, `CONTRIBUTING.md`, `PRD.md`, `GLOSSARY.md`, or a Markdown (`.md`) file under `docs/`. `AGENTS.md` and `CLAUDE.md` are never considered docs-only, even under `docs/`.
+
+Changes to workflows, rulesets, scripts, tests, dependencies, other file types, or any mixture of docs and code run the full checks. Renames count both the old and new paths. PR detection covers the complete merge-base diff, not just the latest commit; push detection covers the complete pushed range. Manual runs, new branches, empty diffs, unavailable history, or detection errors default to full checks. There are no workflow-level path filters that could leave a required check pending.
+
 Run the commit-tier checks locally before opening a PR, with Node 24.20.0:
 
 ```sh
@@ -55,9 +61,9 @@ node --test tests/*.test.mjs
 (cd investigations/selective-recovery && npm ci --ignore-scripts --no-audit --no-fund && npm run probe)
 ```
 
-The policy tests are unit-tier. The investigation probes use real local persistence and synthetic providers (integration-tier). Their success reproduces known compatibility findings; it does **not** pass the selective-recovery release gate. There is no implemented application build/typecheck suite on the initial development branch. Add those checks as the runtime lands; do not mistake the current CI for runtime or release acceptance.
+The policy and docs-path classification tests are unit-tier; one local Git integration test verifies actual diff behavior. The investigation probes use real local persistence and synthetic providers (integration-tier). Their success reproduces known compatibility findings; it does **not** pass the selective-recovery release gate. There is no implemented application build/typecheck suite on the initial development branch. Add those checks as the runtime lands; do not mistake the current CI for runtime or release acceptance.
 
-Keep unit/integration checks on every commit. Future functional journeys belong in PR/nightly CI, with real-model/systemd acceptance remaining operator-run on a non-production host.
+Keep unit/integration checks on every code-affecting commit; the docs-only CI exception above skips those checks for strictly allowlisted documentation changes. Future functional journeys belong in PR/nightly CI, with real-model/systemd acceptance remaining operator-run on a non-production host.
 
 ## GitHub enforcement
 
