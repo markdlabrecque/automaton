@@ -1,0 +1,12 @@
+{
+  "name": "automaton-selective-recovery-investigation",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24 <25" },
+  "scripts": { "probe": "node probe.mjs" },
+  "dependencies": {
+    "@earendil-works/chord": "1.5.2",
+    "@earendil-works/pi-ai": "1.5.2",
+    "@earendil-works/pi-durable": "1.5.2"
+  }
+}
